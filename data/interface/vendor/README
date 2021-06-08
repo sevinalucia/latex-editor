@@ -1,0 +1,7 @@
+This app uses the following open-source JavaScript libraries:
+
+A) CodeMirror (https://github.com/codemirror/CodeMirror)
+vendor/codemirror/(*): >> https://registry.npmjs.org/codemirror/-/codemirror-5.61.1.tgz
+
+B) LaTeX (https://github.com/michael-brade/LaTeX.js)
+vendor/latexjs/(*): https://registry.npmjs.org/latex.js/-/latex.js-0.12.4.tgz
