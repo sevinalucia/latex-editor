@@ -144,7 +144,7 @@ var config  = {
             var output = document.getElementById("output");
             var fileio = document.getElementById("fileio");
             var compile = document.getElementById("compile");
-            var baseURL = (new URL("vendor/latexjs/", location.href)).href;
+            var baseURL = chrome.runtime.getURL("/data/interface/vendor/latexjs/");
             /*  */
             fileio.disabled = true;
             pdf.setAttribute("disabled", '');
@@ -178,10 +178,6 @@ var config  = {
                   fileio.disabled = false;
                   pdf.removeAttribute("disabled");
                   compile.removeAttribute("disabled");
-                  /*  */
-                  var base = iframe.contentWindow.document.createElement("base");
-                  base.href = baseURL;
-                  iframe.contentWindow.document.head.appendChild(base);
                   /*  */
                   iframe.contentWindow.document.head.appendChild(config.app.compile.generator.stylesAndScripts(baseURL));
                   iframe.contentWindow.document.body.appendChild(config.app.compile.generator.domFragment());
