@@ -179,6 +179,10 @@ var config  = {
                   pdf.removeAttribute("disabled");
                   compile.removeAttribute("disabled");
                   /*  */
+                  var base = iframe.contentWindow.document.createElement("base");
+                  base.href = baseURL;
+                  iframe.contentWindow.document.head.appendChild(base);
+                  /*  */
                   iframe.contentWindow.document.head.appendChild(config.app.compile.generator.stylesAndScripts(baseURL));
                   iframe.contentWindow.document.body.appendChild(config.app.compile.generator.domFragment());
                   iframe.contentWindow.document.head.appendChild(style);
