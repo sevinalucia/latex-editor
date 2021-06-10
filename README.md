@@ -8,7 +8,7 @@ Note #2: you don't need to adjust any settings for this add-on, simply open any 
 You can install this app as a PWA on your mobile device, moreover, it is available as a browser extension as-well-as a web application:
 
 Chrome: https://chrome.google.com/webstore/detail/latex-editor/jjbmkdcafifjgaakgpbnhgpjngegpmap  
-Edge: "https://microsoftedge.microsoft.com/addons/detail/mnjcaagmacdllcgakfikkcocooiamgid"  
+Edge: https://microsoftedge.microsoft.com/addons/detail/mnjcaagmacdllcgakfikkcocooiamgid  
 Firefox: https://addons.mozilla.org/en-US/firefox/addon/latex-editor/  
 Opera: https://addons.opera.com/en/extensions/details/latex-editor/  
 Webapp & PWA: https://webbrowsertools.com/latex-editor/  
