@@ -1,22 +1,21 @@
 {
-  "version": "0.1.2",
-  "manifest_version": 2,
+  "version": "0.1.4",
+  "manifest_version": 3,
   "name": "LaTeX Editor",
   "offline_enabled": true,
-  "short_name": "latex-editor",
-  "permissions": ["storage", "contextMenus"],
   "homepage_url": "https://mybrowseraddon.com/latex-editor.html",
   "description": "A lite, free & flexible LaTeX editor app for your browser.",
-  "background": {
-    "persistent": false,
-    "scripts": [
-      "lib/config.js", 
-      "lib/chrome.js",
-      "lib/runtime.js",
-      "lib/common.js"
-    ]
+  "commands": {
+    "_execute_action": {}
   },
-  "browser_action": {
+  "background": {
+    "service_worker": "background.js"
+  },
+  "permissions": [
+    "storage", 
+    "contextMenus"
+  ],
+  "action": {
     "default_title": "LaTeX Editor",
     "default_icon": {
       "16": "data/icons/16.png",
