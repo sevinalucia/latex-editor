@@ -18,15 +18,18 @@ var config  = {
   "resize": {
     "timeout": null,
     "method": function () {
-      var context = document.documentElement.getAttribute("context");
-      if (context === "win") {
+      if (config.port.name === "win") {
         if (config.resize.timeout) window.clearTimeout(config.resize.timeout);
-        config.resize.timeout = window.setTimeout(function () {
+        config.resize.timeout = window.setTimeout(async function () {
+          const current = await chrome.windows.getCurrent();
+          /*  */
           config.storage.write("interface.size", {
-            "width": window.innerWidth || window.outerWidth,
-            "height": window.innerHeight || window.outerHeight
+            "top": current.top,
+            "left": current.left,
+            "width": current.width,
+            "height": current.height
           });
-        }, 300);
+        }, 1000);
       }
     }
   },
@@ -44,7 +47,7 @@ var config  = {
     "write": function (id, data) {
       if (id) {
         if (data !== '' && data !== null && data !== undefined) {
-          var tmp = {};
+          let tmp = {};
           tmp[id] = data;
           config.storage.local[id] = data;
           chrome.storage.local.set(tmp, function () {});
@@ -59,7 +62,7 @@ var config  = {
     "name": '',
     "connect": function () {
       config.port.name = "webapp";
-      var context = document.documentElement.getAttribute("context");
+      const context = document.documentElement.getAttribute("context");
       /*  */
       if (chrome.runtime) {
         if (chrome.runtime.connect) {
@@ -82,21 +85,21 @@ var config  = {
     }
   },
   "load": function () {
-    var reload = document.getElementById("reload");
-    var support = document.getElementById("support");
-    var donation = document.getElementById("donation");
+    const reload = document.getElementById("reload");
+    const support = document.getElementById("support");
+    const donation = document.getElementById("donation");
     /*  */
     reload.addEventListener("click", function () {
       document.location.reload();
     }, false);
     /*  */
     support.addEventListener("click", function () {
-      var url = config.addon.homepage();
+      const url = config.addon.homepage();
       chrome.tabs.create({"url": url, "active": true});
     }, false);
     /*  */
     donation.addEventListener("click", function () {
-      var url = config.addon.homepage() + "?reason=support";
+      const url = config.addon.homepage() + "?reason=support";
       chrome.tabs.create({"url": url, "active": true});
     }, false);
     /*  */
@@ -108,10 +111,10 @@ var config  = {
       "file": function (file, callback) {
         if (!file) return;
         /*  */
-        var reader = new FileReader();
+        const reader = new FileReader();
         reader.readAsText(file);
         reader.onload = function (e) {
-          var content = e.target.result;
+          const content = e.target.result;
           if (content) callback(content);
         };
       }
@@ -119,16 +122,16 @@ var config  = {
     "show": {
       "error": {
         "message": function (e) {
-          var pdf = document.getElementById("pdf");
-          var fileio = document.getElementById("fileio");
-          var compile = document.getElementById("compile");
+          const pdf = document.getElementById("pdf");
+          const fileio = document.getElementById("fileio");
+          const compile = document.getElementById("compile");
           /*  */
           fileio.disabled = false;
           pdf.removeAttribute("disabled");
           compile.removeAttribute("disabled");
           /*  */
-          var pre = document.createElement("pre");
-          var output = document.getElementById("output");
+          const pre = document.createElement("pre");
+          const output = document.getElementById("output");
           pre.textContent = JSON.stringify(e, null, 2);
           output.textContent = '';
           output.appendChild(pre);
@@ -140,11 +143,11 @@ var config  = {
       "to": {
         "latex": {
           "document": function (txt) {
-            var pdf = document.getElementById("pdf");
-            var output = document.getElementById("output");
-            var fileio = document.getElementById("fileio");
-            var compile = document.getElementById("compile");
-            var baseURL = chrome.runtime.getURL("/data/interface/vendor/latexjs/");
+            const pdf = document.getElementById("pdf");
+            const output = document.getElementById("output");
+            const fileio = document.getElementById("fileio");
+            const compile = document.getElementById("compile");
+            const baseURL = chrome.runtime.getURL("/data/interface/vendor/latexjs/");
             /*  */
             fileio.disabled = true;
             pdf.setAttribute("disabled", '');
@@ -153,8 +156,8 @@ var config  = {
             /*  */
             window.setTimeout(function () {
               try {
-                var iframe = document.createElement("iframe");
-                var generator = new latexjs.HtmlGenerator({"hyphenate": false});
+                const iframe = document.createElement("iframe");
+                const generator = new latexjs.HtmlGenerator({"hyphenate": false});
                 /*  */
                 output.textContent = '';
                 iframe.id = "app-iframe";
@@ -162,15 +165,19 @@ var config  = {
                 config.app.compile.generator = latexjs.parse(txt, {"generator": generator});
                 /*  */
                 iframe.onload = function () {
-                  var style = iframe.contentWindow.document.createElement("style");
+                  const size = document.getElementById("size");
+                  const style = iframe.contentWindow.document.createElement("style");
                   style.setAttribute("type", "text/css");
                   style.textContent = `
+                    :root {
+                      --size: ${size.value}pt;
+                    }
                     body {
                       font-size: 100%;
                       font-family: inherit;
                     }
                     .body {
-                      margin: 0 5%;
+                      margin: 0 5% 5% 5%;
                       grid-column: inherit;
                     }
                   `;
@@ -195,14 +202,17 @@ var config  = {
     },
     "start": function () {
       const pdf = document.getElementById("pdf");
+      const size = document.getElementById("size");
       const input = document.getElementById("input");
       const fileio = document.getElementById("fileio");
       const compile = document.getElementById("compile");
       /*  */
       config.codemirror.editor = CodeMirror.fromTextArea(input, config.codemirror.options);
+      size.value = config.storage.read("size") !== undefined ? config.storage.read("size") : 12;
+      /*  */
       try {
         if (config.storage.read("code") !== undefined) {
-          var code = window.atob(config.storage.read("code"));
+          const code = window.atob(config.storage.read("code"));
           config.codemirror.editor.setValue(code);
           window.setTimeout(function () {
             compile.click();
@@ -227,7 +237,7 @@ var config  = {
       });
       /*  */
       compile.addEventListener("click", function (e) {
-        var txt = config.codemirror.editor.getValue();
+        const txt = config.codemirror.editor.getValue();
         config.app.compile.to.latex.document(txt);
       }, false);
       /*  */
@@ -235,6 +245,13 @@ var config  = {
         config.app.process.file(e.target.files[0], function (txt) {
           config.codemirror.editor.setValue(txt);
         });
+      }, false);
+      /*  */
+      size.addEventListener("change", function (e) {
+        config.storage.write("size", e.target.value);
+        window.setTimeout(function () {
+          compile.click();
+        }, 300);
       }, false);
     }
   }
