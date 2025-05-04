@@ -43,22 +43,26 @@ table tr td[disabled] {
   border-spacing: 0;
 }
 
-.fileio table tr td, .toolbar table tr td {
+.fileio table tr td,
+.toolbar table tr td {
   padding: 0;
   width: 52px;
   height: 48px;
   cursor: pointer;
   user-select: none;
   text-align: center;
+  transition: 300ms ease background-color;
 }
 
-.fileio table tr td svg, .toolbar table tr td svg {
-  fill: #676767;
+.fileio table tr td svg,
+.toolbar table tr td svg {
+  fill: #555;
   pointer-events: none;
   vertical-align: middle;
 }
 
-.fileio table tr td:hover, .toolbar table tr td:hover {
+.fileio table tr td:hover,
+.toolbar table tr td:hover {
   background-color: rgba(0,0,0,0.05);
 }
 
@@ -172,13 +176,45 @@ table tr td[disabled] {
   }
 }
 
-@-moz-document url-prefix() {
-  .fileio input,
-  .input textarea, .output iframe {
-    font-family: monaco, "andale mono", "lucida console", "courier new", monospace;
-  }
-}
-
 html[context="webapp"] .toolbar {
   display: none;
+}
+
+html[theme='dark'], 
+html[theme='dark'] body {
+  color: #ebebeb;
+  color-scheme: dark;
+  background-color: #1e1e1e;
+}
+
+html[theme='dark'] .fileio input,
+html[theme='dark'] .fileio .file,
+html[theme='dark'] .fileio .number {
+  color: #ebebeb;
+  background-color: #1e1e1e !important;
+}
+
+html[theme='dark'] .output > div {
+  color: #ebebeb;
+}
+
+html[theme='dark'] .cm-s-lesser-dark span.cm-tag {
+  color: #59a990;
+}
+
+html[theme='dark'] .input,
+html[theme='dark'] .output,
+html[theme='dark'] .fileio .file,
+html[theme='dark'] .fileio .number {
+  border-color: rgb(255 255 255 / 15%);
+}
+
+html[theme='dark'] .fileio table tr td:hover,
+html[theme='dark'] .toolbar table tr td:hover {
+  background-color: rgba(255 255 255 / 5%);
+}
+
+html[theme='dark'] .fileio table tr td svg,
+html[theme='dark'] .toolbar table tr td svg {
+  fill: #ebebeb;
 }

@@ -4,6 +4,16 @@ var config  = {
       return chrome.runtime.getManifest().homepage_url;
     }
   },
+  "action": {
+    "dragover": function (e) {
+      e.preventDefault();
+    },
+    "drop": function (e) {
+      if (e.target.id !== "fileio") {
+        e.preventDefault();
+      }
+    }
+  },
   "codemirror": {
     "editor": null,
     "options": {
@@ -85,6 +95,7 @@ var config  = {
     }
   },
   "load": function () {
+    const theme = document.getElementById("theme");
     const reload = document.getElementById("reload");
     const support = document.getElementById("support");
     const donation = document.getElementById("donation");
@@ -101,6 +112,16 @@ var config  = {
     donation.addEventListener("click", function () {
       const url = config.addon.homepage() + "?reason=support";
       chrome.tabs.create({"url": url, "active": true});
+    }, false);
+    /*  */
+    theme.addEventListener("click", function () {
+      let attribute = document.documentElement.getAttribute("theme");
+      attribute = attribute === "dark" ? "light" : "dark";
+      /*  */
+      document.documentElement.setAttribute("theme", attribute);
+      config.codemirror.editor.setOption("theme", attribute === "dark" ? "lesser-dark" : "default");
+      config.storage.write("theme", attribute);
+      compile.click();
     }, false);
     /*  */
     config.storage.load(config.app.start);
@@ -148,6 +169,7 @@ var config  = {
             const fileio = document.getElementById("fileio");
             const compile = document.getElementById("compile");
             const baseURL = chrome.runtime.getURL("/data/interface/vendor/latexjs/");
+            const theme = config.storage.read("theme") !== undefined ? config.storage.read("theme") : "light";
             /*  */
             fileio.disabled = true;
             pdf.setAttribute("disabled", '');
@@ -171,14 +193,20 @@ var config  = {
                   style.textContent = `
                     :root {
                       --size: ${size.value}pt;
+                      color-scheme: ${theme === 'dark' ? 'dark' : 'light'};
                     }
                     body {
                       font-size: 100%;
                       font-family: inherit;
+                      color: ${theme === 'dark' ? '#ebebeb' : 'black'};
+                      background-color: ${theme === 'dark' ? '#262626' : 'white'};
                     }
                     .body {
                       margin: 0 5% 5% 5%;
                       grid-column: inherit;
+                    }
+                    .picture svg line {
+                      stroke: currentColor;
                     }
                   `;
                   /*  */
@@ -209,34 +237,17 @@ var config  = {
       /*  */
       config.codemirror.editor = CodeMirror.fromTextArea(input, config.codemirror.options);
       size.value = config.storage.read("size") !== undefined ? config.storage.read("size") : 12;
+      const theme = config.storage.read("theme") !== undefined ? config.storage.read("theme") : "light";
       /*  */
-      try {
-        if (config.storage.read("code") !== undefined) {
-          const code = window.atob(config.storage.read("code"));
-          config.codemirror.editor.setValue(code);
-          window.setTimeout(function () {
-            compile.click();
-          }, 300);
-        } else {
-          fetch("resources/test.txt").then(function (e) {return e.text()}).then(function (e) {
-            if (e) {
-              config.codemirror.editor.setValue(e);
-              window.setTimeout(function () {
-                compile.click();
-              }, 300);
-            }
-          }).catch(function () {
-            config.app.show.error.message("Error: could not find the input .tex file!");
-          });
-        }
-      } catch (e) {config.app.show.error.message(e)}
+      document.documentElement.setAttribute("theme", theme !== undefined ? theme : "light");
+      config.codemirror.editor.setOption("theme", theme === "dark" ? "lesser-dark" : "default");
       /*  */
       pdf.addEventListener("click", function () {
         const iframe = document.getElementById("app-iframe");
         if (iframe) iframe.contentWindow.print();
       });
       /*  */
-      compile.addEventListener("click", function (e) {
+      compile.addEventListener("click", function () {
         const txt = config.codemirror.editor.getValue();
         config.app.compile.to.latex.document(txt);
       }, false);
@@ -253,6 +264,31 @@ var config  = {
           compile.click();
         }, 300);
       }, false);
+      /*  */
+      try {
+        if (config.storage.read("code") !== undefined) {
+          const code = window.atob(config.storage.read("code"));
+          config.codemirror.editor.setValue(code);
+          window.setTimeout(function () {
+            compile.click();
+          }, 300);
+        } else {
+          fetch("resources/test.txt").then(function (e) {
+            return e.text();
+          }).then(function (e) {
+            if (e) {
+              config.codemirror.editor.setValue(e);
+              window.setTimeout(function () {
+                compile.click();
+              }, 300);
+            }
+          }).catch(function () {
+            config.app.show.error.message("Error: could not find the input .tex file!");
+          });
+        }
+      } catch (e) {
+        config.app.show.error.message(e);
+      }
     }
   }
 };
@@ -260,6 +296,6 @@ var config  = {
 config.port.connect();
 
 window.addEventListener("load", config.load, false);
+window.addEventListener("drop", config.action.drop);
+window.addEventListener("dragover", config.action.dragover);
 window.addEventListener("resize", config.resize.method, false);
-window.addEventListener("dragover", function (e) {e.preventDefault()});
-window.addEventListener("drop", function (e) {if (e.target.id !== "fileio") e.preventDefault()});
